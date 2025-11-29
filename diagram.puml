@@ -1,0 +1,185 @@
+@startuml
+' Packages (modules)
+package "User Management" {
+  abstract class User {
+    +String id
+    +String name
+    +String email
+    +String address
+    +String phone
+    +String role
+    +register()
+    +login()
+    +updateData()
+  }
+  class Client {
+    +LoyaltyAccount loyalty
+    +List<Order> orderHistory
+    +addToCart(Product, int)
+    +placeOrder(Cart)
+  }
+  class Administrator {
+    +AuditLog auditLog
+    +createProduct(Product)
+    +updateProduct(Product)
+    +deleteProduct(Product)
+    +logAction(String)
+  }
+  User <|-- Client
+  User <|-- Administrator
+}
+
+package "Catalog & Inventory" {
+  class Product {
+    +String id
+    +String name
+    +String description
+    +double price
+    +int stockQuantity
+    +Category category
+    +List<Discount> discounts
+    +create()
+    +update()
+    +delete()
+    +applyDiscount(Discount)
+  }
+  class Category {
+    +String id
+    +String name
+    +Category parent
+  }
+  class Discount {
+    +String id
+    +String name
+    +double percent
+    +Date validFrom
+    +Date validTo
+  }
+}
+
+package "Ordering" {
+  class Cart {
+    +Client owner
+    +List<CartItem> items
+    +PromoCode promo
+    +addItem(Product,int)
+    +removeItem(Product)
+    +applyPromo(PromoCode)
+    +checkout(): Order
+  }
+  class CartItem {
+    +Product product
+    +int quantity
+  }
+  class Order {
+    +String id
+    +Date createdAt
+    +OrderStatus status
+    +Client client
+    +List<OrderItem> items
+    +double total
+    +Shipment shipment
+    +Payment payment
+    +place()
+    +cancel()
+    +pay(Payment)
+    +calculateTotal()
+  }
+  class OrderItem {
+    +Product product
+    +int quantity
+    +double price
+  }
+  enum OrderStatus {
+    PROCESSING
+    IN_TRANSIT
+    DELIVERED
+    CANCELLED
+  }
+}
+
+package "Logistics" {
+  class Shipment {
+    +String id
+    +String address
+    +ShipmentStatus status
+    +Courier courier
+    +dispatch()
+    +track(): String
+    +complete()
+  }
+  class Courier {
+    +String id
+    +String name
+    +String phone
+  }
+  enum ShipmentStatus {
+    CREATED
+    DISPATCHED
+    IN_TRANSIT
+    DELIVERED
+  }
+}
+
+package "Finance" {
+  class Payment {
+    +String id
+    +String type
+    +double amount
+    +String status
+    +Date date
+    +process(): boolean
+    +refund(): boolean
+  }
+  class Refund {
+    +String id
+    +Payment original
+    +double amount
+    +Date date
+  }
+}
+
+package "Community" {
+  class Review {
+    +String id
+    +Product product
+    +Client client
+    +int rating
+    +String text
+    +Date createdAt
+    +publish()
+  }
+  class PromoCode {
+    +String code
+    +double percent
+    +Date expiry
+    +int usageLimit
+    +validate(): boolean
+    +apply(Order)
+  }
+  class LoyaltyAccount {
+    +int points
+    +addPoints(int)
+    +redeemPoints(int)
+  }
+  class AuditLog {
+    +List<String> entries
+    +record(String)
+  }
+}
+
+' Associations
+Client "1" -- "0..*" Order : places >
+Order "1" *-- "1..*" OrderItem : contains >
+OrderItem "0..*" --> "1" Product : references >
+Product "0..*" --> "1" Category : belongs to >
+Order "1" o-- "1" Shipment : has >
+Order "1" o-- "1" Payment : paid by >
+Cart "1" --> "1" Client
+Cart "1" o-- "0..*" CartItem
+PromoCode "0..1" <-- "0..1" Cart
+Review "0..*" --> "1" Product
+Review "0..*" --> "1" Client
+Administrator "1" --> "1" AuditLog
+
+@enduml
