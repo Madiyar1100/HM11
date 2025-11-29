@@ -1,0 +1,58 @@
+@startuml
+
+title Система управления логистикой и доставкой товаров (Диаграмма компонентов)
+
+package "Frontend" {
+  [Web UI]
+  [Mobile App]
+}
+
+package "Backend" {
+  [Order Service]
+  [Delivery Tracking Service]
+  [Warehouse Service]
+  [Route Optimization Adapter]
+  [Courier Integration Adapter]
+  [Notification Service]
+  [Analytics Service]
+}
+
+package "Database" {
+  [Orders DB]
+  [Clients DB]
+  [Products DB]
+  [Routes DB]
+  [Couriers DB]
+}
+
+package "External Systems" {
+  [Courier API]
+  [Payment Gateway]
+}
+
+[Web UI] --> [Order Service] : REST API
+[Mobile App] --> [Delivery Tracking Service] : REST API
+
+[Order Service] --> [Orders DB]
+[Order Service] --> [Clients DB]
+
+[Warehouse Service] --> [Products DB]
+
+[Delivery Tracking Service] --> [Couriers DB]
+
+[Route Optimization Adapter] --> [Routes DB]
+[Backend] --> [Route Optimization Adapter] : Internal API
+
+[Courier Integration Adapter] --> [Courier API] : HTTP/JSON
+[Courier Integration Adapter] --> [Delivery Tracking Service]
+
+[Notification Service] --> [Order Service]
+[Notification Service] --> [Clients DB]
+
+[Analytics Service] --> [Orders DB]
+[Analytics Service] --> [Routes DB]
+[Analytics Service] --> [Couriers DB]
+
+[Order Service] --> [Payment Gateway] : Payment API
+
+@enduml
